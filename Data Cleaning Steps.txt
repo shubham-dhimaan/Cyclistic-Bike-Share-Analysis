@@ -1,0 +1,76 @@
+Original Raw Data Cols:
+
+
+01 - Rental Details Rental ID	
+01 - Rental Details Local Start Time	
+01 - Rental Details Local End Time	
+01 - Rental Details Bike ID	
+01 - Rental Details Duration In Seconds Uncapped	
+03 - Rental Start Station ID	
+03 - Rental Start Station Name	
+02 - Rental End Station ID	
+02 - Rental End Station Name	
+User Type	
+Member Gender	
+05 - Member Details Member Birthday Year
+
+
+
+Cleaned Data Cols:
+
+rental_id	
+start_time	
+end_time	
+bike_id	
+rental_duration	
+start_station_id	
+start_station_name	
+end_station_id	
+end_station_name	
+user_type	
+member_gender	
+member_birth_year	
+ride_length	
+dropped_at_station	
+weekday	
+rider_age
+
+
+
+Data Cleaning Approach: 
+
+1. Data was loaded into power query.
+
+2. Orginal data for the year 2018 was given to us in four files with, one file for each quarter. Since the total combined rows exceeded the limits of Excel, data wasn't combined but each file was separately cleaned and loaded into their respective quarter version. 
+
+3. The result was 5 cleaned files (one of the files was cleaned in two parts, because of too many rows), which were then imported into the table created in Postgres SQL.
+
+
+
+Steps Taken During Cleaning: 
+
+1. Renamed columns to more readable and consistent names. 
+2. Date and Time Values in start and end time were converted into the TIMESTAMP format for SQL which is YYYY-MM-DD HH:MI: SS
+3. Null values were replaced with "Not given" in the gender column.
+4. Data was checked for any duplicates and none were found.
+5. New coloumn of ride_length was calculated by subtracting end_time from start_time. With the help of this new column, any column with a ride duration below 2 minutes was removed. 
+6. The new column of dropped_at_station was calculated by using an if statement. If the values in start_station_name and end_station_name were the same, it would return true. By, this we got data on how many people were dropping bikes at the same or different stations they hired them from. 
+7. A new column of rider_age was created which calculated the age of the rider from the birth year given (formula given below).
+8. A new column of weekday was calculated which extracted the name of the week from the start_time. 
+
+
+
+Forumulas Used: 
+
+1. Used to extract weekday
+
+
+Date.ToText(Date.From(DateTime.From([start_time])), "dddd")
+
+
+DateTime.LocalNow() - DateTime.From(Date.From([member_birth_year] & "-01-01"))
+
+
+2. Used to calculate age from birthday
+
+Date.Year(DateTime.LocalNow()) - [member_birth_year]
